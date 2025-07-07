@@ -4,6 +4,7 @@ import backend.CampoMinadoTabuleiro;
 import backend.CampoMinadoCarta;
 import mecanicas.Carta;
 import backend.CampoMinadoPersistencia;
+import backend.CampoMinadoHistorico;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -48,7 +49,8 @@ public class Main {
                         carregarJogo(sc);
                         break;
                     case 3:
-                        System.out.println("Histórico de Partidas: Em desenvolvimento.");
+                        System.out.println("\n=== HISTÓRICO DE PARTIDAS ===");
+                        System.out.print(CampoMinadoHistorico.lerHistorico());
                         break;
                     case 4:
                         configurarJogo(sc);
@@ -74,6 +76,7 @@ public class Main {
     private static void iniciarJogo(Scanner sc) {
         CampoMinadoTabuleiro tabuleiro = new CampoMinadoTabuleiro(linhasPadrao, colunasPadrao, bombasPadrao);
         boolean fim = false;
+        boolean venceu = false;
         while (!fim) {
             mostrarTabuleiro(tabuleiro);
             System.out.println("Digite: 1 para abrir, 2 para marcar/desmarcar bandeira, 3 para salvar, 9 para pause, 0 para sair para o menu principal");
@@ -141,10 +144,12 @@ public class Main {
                         mostrarTabuleiro(tabuleiro);
                         System.out.println("Você perdeu!");
                         fim = true;
+                        venceu = false;
                     } else if (venceu(tabuleiro)) {
                         mostrarTabuleiro(tabuleiro);
                         System.out.println("Você venceu!");
                         fim = true;
+                        venceu = true;
                     }
                 } else if (op == 2) {
                     tabuleiro.alternarBandeira(l, c);
@@ -155,8 +160,13 @@ public class Main {
                     revelarTodasBombas(tabuleiro);
                     mostrarTabuleiro(tabuleiro);
                     fim = true;
+                    venceu = false;
                 }
             }
+        }
+        // Registra no histórico ao final da partida
+        if (fim) {
+            CampoMinadoHistorico.registrar(venceu ? "Venceu" : "Perdeu", tabuleiro.getTotalLinhas(), tabuleiro.getTotalColunas(), tabuleiro.getBombas());
         }
     }
 
