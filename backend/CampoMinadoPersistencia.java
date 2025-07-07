@@ -29,12 +29,6 @@ public class CampoMinadoPersistencia {
         }
     }
 
-    /**
-     * Carrega o estado do tabuleiro de um arquivo texto simples.
-     * @param caminho Caminho do arquivo origem
-     * @return Tabuleiro restaurado
-     * @throws IOException Se ocorrer erro de leitura ou formato inválido
-     */
     public static CampoMinadoTabuleiro carregarJogo(String caminho) throws IOException {
         try (BufferedReader in = new BufferedReader(new FileReader(caminho))) {
             String[] meta = in.readLine().split(",");

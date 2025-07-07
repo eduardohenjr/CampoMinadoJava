@@ -53,12 +53,6 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
         }
     }
 
-    /**
-     * Abre uma casa do tabuleiro.
-     * @param linha Linha da casa
-     * @param coluna Coluna da casa
-     * @throws Exception Se posição inválida ou bomba encontrada
-     */
     public void abrirCasa(int linha, int coluna) throws Exception {
         if (linha < 0 || linha >= getTotalLinhas() || coluna < 0 || coluna >= getTotalColunas()) {
             throw new Exception("Posição inválida!");
@@ -96,12 +90,6 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
         }
     }
 
-    /**
-     * Alterna bandeira em uma casa do tabuleiro.
-     * @param linha Linha da casa
-     * @param coluna Coluna da casa
-     * @throws Exception Se posição inválida
-     */
     public void alternarBandeira(int linha, int coluna) throws Exception {
         if (linha < 0 || linha >= getTotalLinhas() || coluna < 0 || coluna >= getTotalColunas()) {
             throw new Exception("Posição inválida!");
@@ -118,9 +106,7 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
         }
     }
 
-    /**
-     * Retorna o número de bombas do tabuleiro.
-     */
+    // Retorna o número de bombas do tabuleiro.
     public int getBombas() {
         return this.bombas;
     }

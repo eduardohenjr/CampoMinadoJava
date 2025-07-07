@@ -18,11 +18,7 @@ public class CampoMinadoHistorico {
             // Silencia erro para não atrapalhar o jogo
         }
     }
-
-    /**
-     * Lê o histórico de partidas.
-     * @return String formatada com o histórico
-     */
+    
     public static String lerHistorico() {
         StringBuilder sb = new StringBuilder();
         try (Scanner in = new Scanner(new File(ARQUIVO))) {
