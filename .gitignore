@@ -1,0 +1,29 @@
+# Compilados Java
+bin/
+*.class
+
+# IDEs
+/.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.log
+*.tmp
+*~
+
+# Bibliotecas externas
+lib/
+
+# Documentação gerada
+javadoc/
+
+# Outros
+*.swp
+*.swo
