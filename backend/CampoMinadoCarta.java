@@ -1,12 +1,11 @@
 package backend;
 
-
 import mecanicas.Carta;
 import cores.StringColorida;
 
 /**
- * Representa o tabuleiro do jogo Campo Minado.
- * Subclasse de Tabuleiro da engine CCGM.
+ * Representa uma carta do Campo Minado.
+ * Subclasse de Carta da engine CCGM.
  */
 public class CampoMinadoCarta extends Carta {
     private final boolean temBomba;
@@ -16,7 +15,7 @@ public class CampoMinadoCarta extends Carta {
         super(
             temBomba ? new StringColorida("*") : (numero > 0 ? new StringColorida(Integer.toString(numero)) : new StringColorida(" ")),
             new StringColorida("#"),
-            false // inicia virada para baixo
+            false
         );
         this.temBomba = temBomba;
         this.numero = numero;

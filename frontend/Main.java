@@ -7,6 +7,10 @@ import backend.CampoMinadoPersistencia;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Classe principal do Campo Minado (modo texto).
+ * Responsável pelo menu, interação e fluxo do jogo.
+ */
 public class Main {
     private static int linhasPadrao = 5;
     private static int colunasPadrao = 5;
@@ -66,6 +70,7 @@ public class Main {
         }
     }
 
+    // Inicia um novo jogo
     private static void iniciarJogo(Scanner sc) {
         CampoMinadoTabuleiro tabuleiro = new CampoMinadoTabuleiro(linhasPadrao, colunasPadrao, bombasPadrao);
         boolean fim = false;
@@ -155,6 +160,7 @@ public class Main {
         }
     }
 
+    // Carrega um jogo salvo
     private static void carregarJogo(Scanner sc) {
         System.out.print("Digite o nome do arquivo para carregar: ");
         String nome = sc.nextLine();
@@ -251,6 +257,7 @@ public class Main {
         }
     }
 
+    // Menu de pause
     private static boolean menuPause(Scanner sc) {
         while (true) {
             System.out.println("\n=== MENU DE PAUSE ===");
@@ -268,12 +275,12 @@ public class Main {
             }
             switch (op) {
                 case 1:
-                    return false; // volta para o jogo
+                    return false;
                 case 2:
                     iniciarJogo(sc);
-                    return true; // encerra o jogo atual
+                    return true;
                 case 3:
-                    return true; // encerra o jogo atual
+                    return true;
                 case 0:
                     System.out.println("Saindo do jogo...");
                     System.exit(0);
@@ -283,6 +290,7 @@ public class Main {
         }
     }
 
+    // Exibe as regras do jogo
     private static void mostrarRegras() {
         System.out.println("\n=== REGRAS DO CAMPO MINADO ===");
         System.out.println("- Abra casas sem bombas para vencer.");
@@ -291,6 +299,7 @@ public class Main {
         System.out.println("- Se abrir uma bomba, você perde.");
     }
 
+    // Exibe os créditos
     private static void mostrarCreditos() {
         System.out.println("\n=== CRÉDITOS ===");
         System.out.println("Desenvolvido por: Eduardo Marques");
@@ -298,6 +307,7 @@ public class Main {
         System.out.println("2025");
     }
 
+    // Exibe o tabuleiro no console
     private static void mostrarTabuleiro(CampoMinadoTabuleiro tab) {
         for (int i = 0; i < tab.getTotalLinhas(); i++) {
             for (int j = 0; j < tab.getTotalColunas(); j++) {
@@ -326,6 +336,7 @@ public class Main {
         }
     }
 
+    // Verifica se o jogador venceu
     private static boolean venceu(CampoMinadoTabuleiro tab) {
         for (int i = 0; i < tab.getTotalLinhas(); i++) {
             for (int j = 0; j < tab.getTotalColunas(); j++) {
@@ -344,6 +355,7 @@ public class Main {
         return true;
     }
 
+    // Verifica se o jogador perdeu
     private static boolean perdeu(CampoMinadoTabuleiro tab) {
         for (int i = 0; i < tab.getTotalLinhas(); i++) {
             for (int j = 0; j < tab.getTotalColunas(); j++) {
@@ -362,6 +374,7 @@ public class Main {
         return false;
     }
 
+    // Revela todas as bombas ao perder
     private static void revelarTodasBombas(CampoMinadoTabuleiro tab) {
         for (int i = 0; i < tab.getTotalLinhas(); i++) {
             for (int j = 0; j < tab.getTotalColunas(); j++) {
@@ -377,6 +390,7 @@ public class Main {
         }
     }
 
+    // Configura o jogo (linhas, colunas, bombas)
     private static void configurarJogo(Scanner sc) {
         System.out.println("\n=== CONFIGURAÇÕES ===");
         int l = -1, c = -1, b = -1;
@@ -401,11 +415,11 @@ public class Main {
             sc.nextLine();
             if (c < 2) throw new Exception();
 
-            System.out.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "): ");
+            System.out.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "):");
             while (!sc.hasNextInt()) {
                 System.out.println("Digite um número válido para bombas!");
                 sc.nextLine();
-                System.out.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "): ");
+                System.out.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "):");
             }
             b = sc.nextInt();
             sc.nextLine();

@@ -4,11 +4,15 @@ import mecanicas.Carta;
 import cores.StringColorida;
 import java.io.*;
 
+/**
+ * Classe utilitária para persistência do estado do jogo Campo Minado.
+ * Permite salvar e carregar o tabuleiro em arquivo texto simples.
+ */
 public class CampoMinadoPersistencia {
-    // Salva o estado do tabuleiro em um arquivo texto simples
+
     public static void salvarJogo(CampoMinadoTabuleiro tabuleiro, String caminho) throws IOException {
         try (PrintWriter out = new PrintWriter(new FileWriter(caminho))) {
-            out.println(tabuleiro.getTotalLinhas() + "," + tabuleiro.getTotalColunas() + "," + tabuleiro.getBombas()); // primeira linha: dimensões e bombas
+            out.println(tabuleiro.getTotalLinhas() + "," + tabuleiro.getTotalColunas() + "," + tabuleiro.getBombas());
             for (int i = 0; i < tabuleiro.getTotalLinhas(); i++) {
                 for (int j = 0; j < tabuleiro.getTotalColunas(); j++) {
                     Carta carta = tabuleiro.pegaCarta(i, j);
@@ -18,13 +22,19 @@ public class CampoMinadoPersistencia {
                     int virada = carta.estaViradaParaCima() ? 1 : 0;
                     String frente = carta.getFrente().toString();
                     out.printf("%s,%d,%d,%d,%d,%d,%s\n", tipo, bomba, numero, virada, i, j, frente);
-                    tabuleiro.colocaCarta(i, j, carta); // devolve carta
+                    // devolve carta ao topo do tabuleiro
+                    tabuleiro.colocaCarta(i, j, carta);
                 }
             }
         }
     }
 
-    // Carrega o estado do tabuleiro de um arquivo
+    /**
+     * Carrega o estado do tabuleiro de um arquivo texto simples.
+     * @param caminho Caminho do arquivo origem
+     * @return Tabuleiro restaurado
+     * @throws IOException Se ocorrer erro de leitura ou formato inválido
+     */
     public static CampoMinadoTabuleiro carregarJogo(String caminho) throws IOException {
         try (BufferedReader in = new BufferedReader(new FileReader(caminho))) {
             String[] meta = in.readLine().split(",");
