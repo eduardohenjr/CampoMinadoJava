@@ -3,6 +3,7 @@ package backend;
 import mecanicas.Carta;
 import cores.StringColorida;
 import java.io.*;
+import java.util.Scanner;
 
 /**
  * Classe utilitária para persistência do estado do jogo Campo Minado.
@@ -10,8 +11,8 @@ import java.io.*;
  */
 public class CampoMinadoPersistencia {
 
-    private static final String SAVE_DIR = "saves";
-    private static final String EXTENSAO = ".save";
+    private static String SAVE_DIR = "saves";
+    private static String EXTENSAO = ".save";
 
     private static String caminhoCompleto(String nome) {
         File dir = new File(SAVE_DIR);
@@ -41,14 +42,14 @@ public class CampoMinadoPersistencia {
 
     public static CampoMinadoTabuleiro carregarJogo(String nome) throws IOException {
         String caminho = caminhoCompleto(nome);
-        try (BufferedReader in = new BufferedReader(new FileReader(caminho))) {
-            String[] meta = in.readLine().split(",");
+        try (Scanner in = new Scanner(new File(caminho))) {
+            String[] meta = in.nextLine().split(",");
             int linhas = Integer.parseInt(meta[0]);
             int colunas = Integer.parseInt(meta[1]);
             int bombas = Integer.parseInt(meta[2]);
             CampoMinadoTabuleiro tabuleiro = new CampoMinadoTabuleiro(linhas, colunas, bombas);
-            String linha;
-            while ((linha = in.readLine()) != null) {
+            while (in.hasNextLine()) {
+                String linha = in.nextLine();
                 String[] dados = linha.split(",");
                 String tipo = dados[0];
                 int bomba = Integer.parseInt(dados[1]);

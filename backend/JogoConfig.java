@@ -1,6 +1,7 @@
 package backend;
 
 import java.io.*;
+import java.util.Scanner;
 
 /**
  * Utilitário para armazenar e persistir as configurações padrão do jogo (linhas, colunas, bombas).
@@ -31,10 +32,10 @@ public class JogoConfig {
     private static void carregar() {
         File dir = new File(CONFIG_DIR);
         if (!dir.exists()) dir.mkdirs();
-        try (BufferedReader br = new BufferedReader(new FileReader(CONFIG_FILE))) {
-            linhasPadrao = Integer.parseInt(br.readLine());
-            colunasPadrao = Integer.parseInt(br.readLine());
-            bombasPadrao = Integer.parseInt(br.readLine());
+        try (Scanner sc = new Scanner(new File(CONFIG_FILE))) {
+            if (sc.hasNextLine()) linhasPadrao = Integer.parseInt(sc.nextLine());
+            if (sc.hasNextLine()) colunasPadrao = Integer.parseInt(sc.nextLine());
+            if (sc.hasNextLine()) bombasPadrao = Integer.parseInt(sc.nextLine());
         } catch (Exception e) {
         }
     }

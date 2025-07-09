@@ -8,8 +8,8 @@ import cores.StringColorida;
  * Subclasse de Carta da engine CCGM.
  */
 public class CampoMinadoCarta extends Carta {
-    private final boolean temBomba;
-    private final int numero;
+    private boolean temBomba;
+    private int numero;
 
     public CampoMinadoCarta(boolean temBomba, int numero) {
         super(

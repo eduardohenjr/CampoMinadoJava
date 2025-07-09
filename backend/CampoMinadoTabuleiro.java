@@ -64,6 +64,10 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
             throw new Exception("Posição inválida!");
         }
         Carta carta = pegaCarta(linha, coluna);
+        if (isBandeira(carta)) {
+            this.colocaCarta(linha, coluna, carta);
+            return;
+        }
         if (carta instanceof CampoMinadoCarta) {
             CampoMinadoCarta cmc = (CampoMinadoCarta) carta;
             if (cmc.temBomba()) {
@@ -88,9 +92,6 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
                     }
                 }
             }
-        } else if (carta.getFrente().toString().equals("F")) {
-            this.colocaCarta(linha, coluna, carta);
-            return;
         } else {
             this.colocaCarta(linha, coluna, carta);
         }
@@ -191,7 +192,7 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
         String simboloBandeira = pref.simboloBandeira;
         String corFundo = pref.corFundo;
         String corNumero = pref.corNumero;
-        StringBuilder sb = new StringBuilder();
+        String resultado = "";
         for (int i = 0; i < getTotalLinhas(); i++) {
             for (int j = 0; j < getTotalColunas(); j++) {
                 Carta carta = pegaCarta(i, j);
@@ -199,31 +200,31 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
                     if (carta instanceof CampoMinadoCarta) {
                         CampoMinadoCarta cmc = (CampoMinadoCarta) carta;
                         if (cmc.temBomba()) {
-                            sb.append(simboloBomba);
+                            resultado = resultado + simboloBomba;
                         } else if (cmc.getNumero() > 0) {
                             cores.Cor corNumEnum;
                             try { corNumEnum = cores.Cor.valueOf(corNumero); } catch (Exception e) { corNumEnum = cores.Cor.RESET; }
-                            sb.append(new cores.StringColorida(String.valueOf(cmc.getNumero()), corNumEnum));
+                            resultado = resultado + new cores.StringColorida(String.valueOf(cmc.getNumero()), corNumEnum);
                         } else {
                             cores.Cor corFundoEnum;
                             try { corFundoEnum = cores.Cor.valueOf(corFundo); } catch (Exception e) { corFundoEnum = cores.Cor.RESET; }
-                            sb.append(new cores.StringColorida(" ", corFundoEnum));
+                            resultado = resultado + new cores.StringColorida(" ", corFundoEnum);
                         }
                     } else {
-                        sb.append("?");
+                        resultado = resultado + "?";
                     }
                 } else if (isBandeira(carta)) {
-                    sb.append(simboloBandeira);
+                    resultado = resultado + simboloBandeira;
                 } else {
                     cores.Cor corFundoEnum;
                     try { corFundoEnum = cores.Cor.valueOf(corFundo); } catch (Exception e) { corFundoEnum = cores.Cor.RESET; }
-                    sb.append(new cores.StringColorida("#", corFundoEnum));
+                    resultado = resultado + new cores.StringColorida("#", corFundoEnum);
                 }
                 colocaCarta(i, j, carta);
-                sb.append(" ");
+                resultado = resultado + " ";
             }
-            sb.append("\n");
+            resultado = resultado + "\n";
         }
-        return sb.toString();
+        return resultado;
     }
 }

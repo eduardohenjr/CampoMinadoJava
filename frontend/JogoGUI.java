@@ -166,7 +166,7 @@ public class JogoGUI extends JFrame {
                 opcoes[0]);
         if (escolha == 1) { 
             dispose();
-            new JogoGUI(linhas, colunas, tabuleiro.getBombas()).setVisible(true);
+            MainGUI.abrirNovoJogo(linhas, colunas, tabuleiro.getBombas());
         } else if (escolha == 2) {
             dispose();
             MainGUI.mostrarMenuPrincipal();
@@ -213,9 +213,10 @@ public class JogoGUI extends JFrame {
             tabuleiro.abrirCasa(l, c);
             if (tabuleiro.venceu()) {
                 jogoEncerrado = true;
-                setEnabled(false); // Desabilita a janela inteira
+                setEnabled(false); 
                 desabilitarTabuleiro();
                 atualizarTabuleiro();
+                backend.CampoMinadoHistorico.registrar("Vitória", linhas, colunas, tabuleiro.getBombas());
                 JOptionPane.showMessageDialog(this, "Você venceu!", "Fim de Jogo", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
                 return;
@@ -229,6 +230,7 @@ public class JogoGUI extends JFrame {
                     desabilitarTabuleiro();
                     tabuleiro.revelarBombas();
                     atualizarTabuleiro();
+                    backend.CampoMinadoHistorico.registrar("Perdeu", linhas, colunas, tabuleiro.getBombas());
                     JOptionPane.showMessageDialog(this, "Bomba encontrada! Fim de jogo.", "Fim de Jogo", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
                 }

@@ -28,6 +28,23 @@ public class Main {
     };
 
     public static void main(String[] args) {
+        // Verifica argumento de histórico customizado
+        String[] argsFiltrados = new String[args != null ? args.length : 0];
+        int n = 0;
+        if (args != null && args.length > 0) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].equalsIgnoreCase("--historico") && i + 1 < args.length) {
+                    backend.CampoMinadoHistorico.setArquivo(args[i + 1]);
+                    i++; // pula o nome do arquivo
+                } else {
+                    argsFiltrados[n++] = args[i];
+                }
+            }
+        }
+        // Reduz o array para o tamanho real
+        String[] argumentos = new String[n];
+        System.arraycopy(argsFiltrados, 0, argumentos, 0, n);
+
         CampoMinadoConfig.Preferencias pref = CampoMinadoConfig.carregarPreferencias();
         simboloBomba = pref.simboloBomba;
         simboloBandeira = pref.simboloBandeira;
@@ -38,22 +55,22 @@ public class Main {
         bombasPadrao = JogoConfig.getBombasPadrao();
         Scanner sc = new Scanner(System.in);
         try {
-            if (args != null && args.length > 0) {
-                if (args[0].equals("novo")) {
-                    if (args.length == 4) {
+            if (argumentos != null && argumentos.length > 0) {
+                if (argumentos[0].equals("novo")) {
+                    if (argumentos.length == 4) {
                         try {
-                            linhasPadrao = Integer.parseInt(args[1]);
-                            colunasPadrao = Integer.parseInt(args[2]);
-                            bombasPadrao = Integer.parseInt(args[3]);
+                            linhasPadrao = Integer.parseInt(argumentos[1]);
+                            colunasPadrao = Integer.parseInt(argumentos[2]);
+                            bombasPadrao = Integer.parseInt(argumentos[3]);
                         } catch (Exception e) {
                             Console.println("Argumentos inválidos para novo jogo. Usando padrão.");
                         }
                     }
                     iniciarJogo();
                     return;
-                } else if (args[0].equals("carregar")) {
-                    if (args.length >= 2) {
-                        String nome = args[1];
+                } else if (argumentos[0].equals("carregar")) {
+                    if (argumentos.length >= 2) {
+                        String nome = argumentos[1];
                         try {
                             CampoMinadoTabuleiro tabuleiro = backend.CampoMinadoPersistencia.carregarJogo(nome);
                             Console.println("Jogo carregado!");
@@ -66,12 +83,12 @@ public class Main {
                         Console.println("Uso: carregar <nome_do_save>");
                         return;
                     }
-                } else if (args[0].equals("config")) {
-                    if (args.length == 4) {
+                } else if (argumentos[0].equals("config")) {
+                    if (argumentos.length == 4) {
                         try {
-                            linhasPadrao = Integer.parseInt(args[1]);
-                            colunasPadrao = Integer.parseInt(args[2]);
-                            bombasPadrao = Integer.parseInt(args[3]);
+                            linhasPadrao = Integer.parseInt(argumentos[1]);
+                            colunasPadrao = Integer.parseInt(argumentos[2]);
+                            bombasPadrao = Integer.parseInt(argumentos[3]);
                             Console.println("Configuração definida: " + linhasPadrao + "x" + colunasPadrao + ", " + bombasPadrao + " bombas.");
                         } catch (Exception e) {
                             Console.println("Argumentos inválidos para configuração.");

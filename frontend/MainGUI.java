@@ -114,4 +114,12 @@ public class MainGUI {
         frame.setContentPane(panel);
         frame.setVisible(true);
     }
+
+    public static void abrirNovoJogo(int linhas, int colunas, int bombas) {
+        new JogoGUI(linhas, colunas, bombas).setVisible(true);
+    }
+
+    public static void abrirNovoJogo(backend.CampoMinadoTabuleiro tabuleiro) {
+        new JogoGUI(tabuleiro).setVisible(true);
+    }
 }
