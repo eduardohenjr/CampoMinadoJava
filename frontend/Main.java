@@ -151,30 +151,12 @@ public class Main {
         boolean fim = false;
         while (!fim) {
             mostrarTabuleiro(tabuleiro);
-            Console.println("Digite: 1 para abrir, 2 para marcar/desmarcar bandeira, 3 para salvar, 9 para pause, 0 para sair para o menu principal");
+            Console.println("Digite: 1 para abrir, 2 para marcar/desmarcar bandeira, 9 para pause, 0 para sair para o menu principal");
             int op;
             try { op = Integer.parseInt(Console.input()); } catch (Exception e) { Console.println("Opção inválida!"); continue; }
             if (op == 0) break;
-            if (op == 9) { if (menuPause()) break; else continue; }
-            if (op == 3) {
-                listarSaves();
-                String nomeSave = Console.input("Digite o nome do arquivo para salvar (sem extensão): ").trim();
-                if (nomeSave.isEmpty()) { Console.println("Nome inválido!"); continue; }
-                String[] saves = backend.CampoMinadoPersistencia.listarSaves();
-                boolean existe = false;
-                for (String s : saves) if (s.equals(nomeSave + ".save")) existe = true;
-                if (existe) {
-                    String resp = Console.input("Arquivo já existe. Deseja sobrescrever? (s/n): ").trim().toLowerCase();
-                    if (!resp.equals("s")) { Console.println("Operação cancelada."); continue; }
-                }
-                try {
-                    backend.CampoMinadoPersistencia.salvarJogo(tabuleiro, nomeSave);
-                    Console.println("Jogo salvo com sucesso!");
-                    nomeSaveAuto = nomeSave;
-                } catch (IOException e) { Console.println("Erro ao salvar: " + e.getMessage()); }
-                continue;
-            }
-            if (op != 1 && op != 2) { Console.println("Opção inválida! Digite 1, 2, 3, 9 ou 0."); continue; }
+            if (op == 9) { if (menuPause(tabuleiro)) break; else continue; }
+            if (op != 1 && op != 2) { Console.println("Opção inválida! Digite 1, 2, 9 ou 0."); continue; }
             int l = -1, c = -1;
             while (true) {
                 String linhaStr = Console.input("Linha: ");
@@ -248,12 +230,13 @@ public class Main {
         }
     }
 
-    private static boolean menuPause() {
+    private static boolean menuPause(CampoMinadoTabuleiro tabuleiro) {
         while (true) {
             Console.println("\n=== MENU DE PAUSE ===");
             Console.println("1. Voltar para o jogo");
             Console.println("2. Iniciar novo jogo");
             Console.println("3. Voltar ao Menu Principal");
+            Console.println("4. Salvar jogo");
             Console.println("0. Sair do jogo");
             Console.print("Escolha uma opção: ");
             int op;
@@ -262,6 +245,22 @@ public class Main {
                 case 1: return false;
                 case 2: iniciarJogo(); return true;
                 case 3: return true;
+                case 4:
+                    listarSaves();
+                    String nomeSave = Console.input("Digite o nome do arquivo para salvar (sem extensão): ").trim();
+                    if (nomeSave.isEmpty()) { Console.println("Nome inválido!"); continue; }
+                    String[] saves = backend.CampoMinadoPersistencia.listarSaves();
+                    boolean existe = false;
+                    for (String s : saves) if (s.equals(nomeSave + ".save")) existe = true;
+                    if (existe) {
+                        String resp = Console.input("Arquivo já existe. Deseja sobrescrever? (s/n): ").trim().toLowerCase();
+                        if (!resp.equals("s")) { Console.println("Operação cancelada."); continue; }
+                    }
+                    try {
+                        backend.CampoMinadoPersistencia.salvarJogo(tabuleiro, nomeSave);
+                        Console.println("Jogo salvo com sucesso!");
+                    } catch (IOException e) { Console.println("Erro ao salvar: " + e.getMessage()); }
+                    continue;
                 case 0: Console.println("Saindo do jogo..."); System.exit(0);
                 default: Console.println("Opção inválida!");
             }

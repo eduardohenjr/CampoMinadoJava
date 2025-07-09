@@ -155,22 +155,22 @@ public class JogoGUI extends JFrame {
     }
 
     private void mostrarMenuPause() {
-        String[] opcoes = {"\u25B6 Voltar", "\uD83C\uDFB2 Novo Jogo", "\u2302 Menu Principal", "\uD83D\uDCBE Salvar Jogo", "\u2699 Personalizar", "\u274C Sair"};
+        String[] opcoes = {"Voltar para o jogo", "Iniciar novo jogo", "Voltar ao Menu Principal", "Salvar jogo", "Sair do jogo"};
         int escolha = JOptionPane.showOptionDialog(this,
-                "Menu de Pause",
+                "=== MENU DE PAUSE ===",
                 "Pause",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
                 opcoes,
                 opcoes[0]);
-        if (escolha == 1) { 
+        if (escolha == 1) { // Iniciar novo jogo
             dispose();
             MainGUI.abrirNovoJogo(linhas, colunas, tabuleiro.getBombas());
-        } else if (escolha == 2) {
+        } else if (escolha == 2) { // Voltar ao Menu Principal
             dispose();
             MainGUI.mostrarMenuPrincipal();
-        } else if (escolha == 3) {
+        } else if (escolha == 3) { // Salvar jogo
             String nome = JOptionPane.showInputDialog(this, "Digite o nome do save (sem extensão):");
             if (nome != null && !nome.trim().isEmpty()) {
                 try {
@@ -181,12 +181,10 @@ public class JogoGUI extends JFrame {
                 }
             }
             mostrarMenuPause();
-        } else if (escolha == 4) { 
-            mostrarMenuPersonalizacao();
-            mostrarMenuPause();
-        } else if (escolha == 5) {
+        } else if (escolha == 4) { // Sair do jogo
             System.exit(0);
         }
+        // escolha == 0: Voltar para o jogo (não faz nada)
     }
 
     private void mostrarMenuPersonalizacao() {
