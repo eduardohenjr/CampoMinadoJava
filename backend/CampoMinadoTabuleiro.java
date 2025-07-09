@@ -2,12 +2,8 @@ package backend;
 
 import mecanicas.Tabuleiro;
 import mecanicas.Carta;
-import cores.StringColorida;
+import mecanicas.PilhaDeCartas;
 
-/**
- * Representa o tabuleiro do jogo Campo Minado.
- * Subclasse de Tabuleiro da engine CCGM.
- */
 public class CampoMinadoTabuleiro extends Tabuleiro {
     private int bombas;
 
@@ -17,8 +13,12 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
         inicializarTabuleiro();
     }
 
-    // Inicializa o tabuleiro com bombas e números
     private void inicializarTabuleiro() {
+        boolean[][] bombasArray = distribuirBombas();
+        calcularNumeros(bombasArray);
+    }
+
+    private boolean[][] distribuirBombas() {
         boolean[][] bombasArray = new boolean[getTotalLinhas()][getTotalColunas()];
         for (int i = 0; i < getTotalLinhas(); i++) {
             for (int j = 0; j < getTotalColunas(); j++) {
@@ -36,15 +36,17 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
                 bombasColocadas++;
             }
         }
+        return bombasArray;
+    }
+
+    private void calcularNumeros(boolean[][] bombasArray) {
         for (int i = 0; i < getTotalLinhas(); i++) {
             for (int j = 0; j < getTotalColunas(); j++) {
                 if (!bombasArray[i][j]) {
                     int count = 0;
                     for (int x = i - 1; x <= i + 1; x++) {
                         for (int y = j - 1; y <= j + 1; y++) {
-                            if (x >= 0 && x < getTotalLinhas() && y >= 0 && y < getTotalColunas()) {
-                                if (bombasArray[x][y]) count++;
-                            }
+                            if (estaDentro(x, y) && bombasArray[x][y]) count++;
                         }
                     }
                     this.colocaCarta(i, j, new CampoMinadoCarta(false, count));
@@ -53,8 +55,12 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
         }
     }
 
+    private boolean estaDentro(int linha, int coluna) {
+        return linha >= 0 && linha < getTotalLinhas() && coluna >= 0 && coluna < getTotalColunas();
+    }
+
     public void abrirCasa(int linha, int coluna) throws Exception {
-        if (linha < 0 || linha >= getTotalLinhas() || coluna < 0 || coluna >= getTotalColunas()) {
+        if (!estaDentro(linha, coluna)) {
             throw new Exception("Posição inválida!");
         }
         Carta carta = pegaCarta(linha, coluna);
@@ -70,11 +76,11 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
             if (cmc.getNumero() == 0) {
                 for (int i = linha - 1; i <= linha + 1; i++) {
                     for (int j = coluna - 1; j <= coluna + 1; j++) {
-                        if (i >= 0 && i < getTotalLinhas() && j >= 0 && j < getTotalColunas() && (i != linha || j != coluna)) {
+                        if (estaDentro(i, j) && (i != linha || j != coluna)) {
                             Carta vizinha = pegaCarta(i, j);
                             if (vizinha instanceof CampoMinadoCarta && !vizinha.estaViradaParaCima()) {
+                                vizinha.vira();
                                 this.colocaCarta(i, j, vizinha);
-                                abrirCasa(i, j);
                             } else {
                                 this.colocaCarta(i, j, vizinha);
                             }
@@ -91,23 +97,133 @@ public class CampoMinadoTabuleiro extends Tabuleiro {
     }
 
     public void alternarBandeira(int linha, int coluna) throws Exception {
-        if (linha < 0 || linha >= getTotalLinhas() || coluna < 0 || coluna >= getTotalColunas()) {
+        if (!estaDentro(linha, coluna)) {
             throw new Exception("Posição inválida!");
         }
-        Carta carta = pegaCarta(linha, coluna);
-        if (carta.getFrente().toString().equals("F")) {
-            Carta debaixo = pegaCarta(linha, coluna);
-            this.colocaCarta(linha, coluna, debaixo);
-        } else if (!carta.estaViradaParaCima()) {
-            this.colocaCarta(linha, coluna, carta);
-            this.colocaCarta(linha, coluna, new Carta(new StringColorida("F"), new StringColorida("#")) {});
-        } else {
-            this.colocaCarta(linha, coluna, carta);
+        PilhaDeCartas pilha = getPilha(linha, coluna);
+        Carta topo = pilha.verTopo();
+        if (isBandeira(topo)) {
+            pilha.compra();
+        } else if (!topo.estaViradaParaCima()) {
+            String simboloBandeira = CampoMinadoConfig.carregarPreferencias().simboloBandeira;
+            pilha.insereTopo(new CampoMinadoCarta(false, -1) {
+                @Override
+                public String toString() {
+                    return simboloBandeira;
+                }
+                @Override
+                public cores.StringColorida getFrente() {
+                    return new cores.StringColorida(simboloBandeira);
+                }
+            });
         }
     }
 
-    // Retorna o número de bombas do tabuleiro.
     public int getBombas() {
         return this.bombas;
+    }
+
+    public static boolean isBandeira(Carta carta) {
+        if (carta == null) return false;
+        if (carta instanceof CampoMinadoCarta) {
+            CampoMinadoCarta cmc = (CampoMinadoCarta) carta;
+            if (cmc.getNumero() == -1) return true;
+        }
+        String simboloBandeira = CampoMinadoConfig.carregarPreferencias().simboloBandeira;
+        return carta.getFrente().toString().equals(simboloBandeira);
+    }
+
+    public boolean venceu() {
+        for (int i = 0; i < getTotalLinhas(); i++) {
+            for (int j = 0; j < getTotalColunas(); j++) {
+                Carta carta = pegaCarta(i, j);
+                boolean ok = true;
+                if (carta instanceof CampoMinadoCarta) {
+                    CampoMinadoCarta c = (CampoMinadoCarta) carta;
+                    if (!c.temBomba() && !c.estaViradaParaCima()) {
+                        ok = false;
+                    }
+                }
+                colocaCarta(i, j, carta);
+                if (!ok) return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean perdeu() {
+        for (int i = 0; i < getTotalLinhas(); i++) {
+            for (int j = 0; j < getTotalColunas(); j++) {
+                Carta carta = pegaCarta(i, j);
+                boolean lost = false;
+                if (carta instanceof CampoMinadoCarta) {
+                    CampoMinadoCarta c = (CampoMinadoCarta) carta;
+                    if (c.temBomba() && c.estaViradaParaCima()) {
+                        lost = true;
+                    }
+                }
+                colocaCarta(i, j, carta);
+                if (lost) return true;
+            }
+        }
+        return false;
+    }
+
+    public void revelarBombas() {
+        for (int i = 0; i < getTotalLinhas(); i++) {
+            for (int j = 0; j < getTotalColunas(); j++) {
+                Carta carta = pegaCarta(i, j);
+                if (carta instanceof CampoMinadoCarta) {
+                    CampoMinadoCarta c = (CampoMinadoCarta) carta;
+                    if (c.temBomba() && !c.estaViradaParaCima()) {
+                        c.vira();
+                    }
+                }
+                colocaCarta(i, j, carta);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        CampoMinadoConfig.Preferencias pref = CampoMinadoConfig.carregarPreferencias();
+        String simboloBomba = pref.simboloBomba;
+        String simboloBandeira = pref.simboloBandeira;
+        String corFundo = pref.corFundo;
+        String corNumero = pref.corNumero;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < getTotalLinhas(); i++) {
+            for (int j = 0; j < getTotalColunas(); j++) {
+                Carta carta = pegaCarta(i, j);
+                if (carta.estaViradaParaCima()) {
+                    if (carta instanceof CampoMinadoCarta) {
+                        CampoMinadoCarta cmc = (CampoMinadoCarta) carta;
+                        if (cmc.temBomba()) {
+                            sb.append(simboloBomba);
+                        } else if (cmc.getNumero() > 0) {
+                            cores.Cor corNumEnum;
+                            try { corNumEnum = cores.Cor.valueOf(corNumero); } catch (Exception e) { corNumEnum = cores.Cor.RESET; }
+                            sb.append(new cores.StringColorida(String.valueOf(cmc.getNumero()), corNumEnum));
+                        } else {
+                            cores.Cor corFundoEnum;
+                            try { corFundoEnum = cores.Cor.valueOf(corFundo); } catch (Exception e) { corFundoEnum = cores.Cor.RESET; }
+                            sb.append(new cores.StringColorida(" ", corFundoEnum));
+                        }
+                    } else {
+                        sb.append("?");
+                    }
+                } else if (isBandeira(carta)) {
+                    sb.append(simboloBandeira);
+                } else {
+                    cores.Cor corFundoEnum;
+                    try { corFundoEnum = cores.Cor.valueOf(corFundo); } catch (Exception e) { corFundoEnum = cores.Cor.RESET; }
+                    sb.append(new cores.StringColorida("#", corFundoEnum));
+                }
+                colocaCarta(i, j, carta);
+                sb.append(" ");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 }

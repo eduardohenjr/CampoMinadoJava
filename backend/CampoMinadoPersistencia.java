@@ -10,7 +10,18 @@ import java.io.*;
  */
 public class CampoMinadoPersistencia {
 
-    public static void salvarJogo(CampoMinadoTabuleiro tabuleiro, String caminho) throws IOException {
+    private static final String SAVE_DIR = "saves";
+    private static final String EXTENSAO = ".save";
+
+    private static String caminhoCompleto(String nome) {
+        File dir = new File(SAVE_DIR);
+        if (!dir.exists()) dir.mkdirs();
+        if (!nome.endsWith(EXTENSAO)) nome += EXTENSAO;
+        return SAVE_DIR + File.separator + nome;
+    }
+
+    public static void salvarJogo(CampoMinadoTabuleiro tabuleiro, String nome) throws IOException {
+        String caminho = caminhoCompleto(nome);
         try (PrintWriter out = new PrintWriter(new FileWriter(caminho))) {
             out.println(tabuleiro.getTotalLinhas() + "," + tabuleiro.getTotalColunas() + "," + tabuleiro.getBombas());
             for (int i = 0; i < tabuleiro.getTotalLinhas(); i++) {
@@ -22,14 +33,14 @@ public class CampoMinadoPersistencia {
                     int virada = carta.estaViradaParaCima() ? 1 : 0;
                     String frente = carta.getFrente().toString();
                     out.printf("%s,%d,%d,%d,%d,%d,%s\n", tipo, bomba, numero, virada, i, j, frente);
-                    // devolve carta ao topo do tabuleiro
                     tabuleiro.colocaCarta(i, j, carta);
                 }
             }
         }
     }
 
-    public static CampoMinadoTabuleiro carregarJogo(String caminho) throws IOException {
+    public static CampoMinadoTabuleiro carregarJogo(String nome) throws IOException {
+        String caminho = caminhoCompleto(nome);
         try (BufferedReader in = new BufferedReader(new FileReader(caminho))) {
             String[] meta = in.readLine().split(",");
             int linhas = Integer.parseInt(meta[0]);
@@ -59,5 +70,15 @@ public class CampoMinadoPersistencia {
         } catch (Exception e) {
             throw new IOException("Erro ao carregar o jogo: " + e.getMessage());
         }
+    }
+
+    public static String[] listarSaves() {
+        File dir = new File(SAVE_DIR);
+        if (!dir.exists()) return new String[0];
+        return dir.list(new FilenameFilter() {
+            public boolean accept(File d, String name) {
+                return name.endsWith(EXTENSAO);
+            }
+        });
     }
 }

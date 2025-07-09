@@ -1,446 +1,343 @@
 package frontend;
 
 import backend.CampoMinadoTabuleiro;
-import backend.CampoMinadoCarta;
-import mecanicas.Carta;
-import backend.CampoMinadoPersistencia;
 import backend.CampoMinadoHistorico;
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.NoSuchElementException;
+import backend.CampoMinadoConfig;
+import console.Console;
+import cores.Cor;
+import backend.JogoConfig;
 
-/**
- * Classe principal do Campo Minado (modo texto).
- * Responsável pelo menu, interação e fluxo do jogo.
- */
 public class Main {
     private static int linhasPadrao = 5;
     private static int colunasPadrao = 5;
     private static int bombasPadrao = 5;
+    private static String simboloBomba = "*";
+    private static String simboloBandeira = "F";
+    private static Cor corFundo = Cor.RESET;
+    private static Cor corNumero = Cor.RESET;
+    private static final String[] OPCOES_BOMBA = {"*", "B", "@", "X", "#"};
+    private static final String[] OPCOES_BANDEIRA = {"F", "!", "#", "B", "P"};
+    private static final Cor[] OPCOES_COR_FUNDO = {
+        Cor.RESET, Cor.FUNDO_VERMELHO, Cor.FUNDO_VERDE, Cor.FUNDO_AMARELO, Cor.FUNDO_AZUL, Cor.FUNDO_ROXO, Cor.FUNDO_CIANO, Cor.FUNDO_BRANCO
+    };
+    private static final Cor[] OPCOES_COR_NUMERO = {
+        Cor.RESET, Cor.VERMELHO, Cor.VERDE, Cor.AMARELO, Cor.AZUL, Cor.ROXO, Cor.CIANO, Cor.BRANCO
+    };
 
     public static void main(String[] args) {
+        CampoMinadoConfig.Preferencias pref = CampoMinadoConfig.carregarPreferencias();
+        simboloBomba = pref.simboloBomba;
+        simboloBandeira = pref.simboloBandeira;
+        corFundo = converteCorParaEnum(pref.corFundo);
+        corNumero = converteCorParaEnum(pref.corNumero);
+        linhasPadrao = JogoConfig.getLinhasPadrao();
+        colunasPadrao = JogoConfig.getColunasPadrao();
+        bombasPadrao = JogoConfig.getBombasPadrao();
         Scanner sc = new Scanner(System.in);
         try {
+            if (args != null && args.length > 0) {
+                if (args[0].equals("novo")) {
+                    if (args.length == 4) {
+                        try {
+                            linhasPadrao = Integer.parseInt(args[1]);
+                            colunasPadrao = Integer.parseInt(args[2]);
+                            bombasPadrao = Integer.parseInt(args[3]);
+                        } catch (Exception e) {
+                            Console.println("Argumentos inválidos para novo jogo. Usando padrão.");
+                        }
+                    }
+                    iniciarJogo();
+                    return;
+                } else if (args[0].equals("carregar")) {
+                    if (args.length >= 2) {
+                        String nome = args[1];
+                        try {
+                            CampoMinadoTabuleiro tabuleiro = backend.CampoMinadoPersistencia.carregarJogo(nome);
+                            Console.println("Jogo carregado!");
+                            jogarTabuleiro(tabuleiro, nome);
+                        } catch (IOException e) {
+                            Console.println("Erro ao carregar: " + e.getMessage());
+                        }
+                        return;
+                    } else {
+                        Console.println("Uso: carregar <nome_do_save>");
+                        return;
+                    }
+                } else if (args[0].equals("config")) {
+                    if (args.length == 4) {
+                        try {
+                            linhasPadrao = Integer.parseInt(args[1]);
+                            colunasPadrao = Integer.parseInt(args[2]);
+                            bombasPadrao = Integer.parseInt(args[3]);
+                            Console.println("Configuração definida: " + linhasPadrao + "x" + colunasPadrao + ", " + bombasPadrao + " bombas.");
+                        } catch (Exception e) {
+                            Console.println("Argumentos inválidos para configuração.");
+                        }
+                    } else {
+                        Console.println("Uso: config <linhas> <colunas> <bombas>");
+                    }
+                    return;
+                } else {
+                    Console.println("Argumento não reconhecido. Use: novo | novo l c b | carregar nome | config l c b");
+                    return;
+                }
+            }
             while (true) {
-                System.out.println("\n=== MENU PRINCIPAL ===");
-                System.out.println("1. Iniciar Jogo");
-                System.out.println("2. Carregar Jogo");
-                System.out.println("3. Histórico de Partidas");
-                System.out.println("4. Configurações");
-                System.out.println("5. Ver Regras");
-                System.out.println("6. Créditos");
-                System.out.println("0. Sair");
-                System.out.print("Escolha uma opção: ");
+                Console.println("\n=== MENU PRINCIPAL ===");
+                Console.println("1. Iniciar Jogo");
+                Console.println("2. Carregar Jogo");
+                Console.println("3. Histórico de Partidas");
+                Console.println("4. Configurações");
+                Console.println("5. Ver Regras");
+                Console.println("6. Créditos");
+                Console.println("7. Personalizar");
+                Console.println("0. Sair");
                 int op;
                 try {
-                    op = Integer.parseInt(sc.nextLine());
+                    op = Integer.parseInt(Console.input("Escolha uma opção: "));
+                } catch (NoSuchElementException e) {
+                    Console.println("\nSaindo do jogo (Ctrl+C detectado)...");
+                    break;
                 } catch (Exception e) {
-                    System.out.println("Opção inválida!");
+                    Console.println("Opção inválida!");
                     continue;
                 }
                 if (op == 0) {
-                    System.out.println("Saindo...");
+                    Console.println("Saindo...");
                     break;
                 }
                 switch (op) {
-                    case 1:
-                        iniciarJogo(sc);
-                        break;
-                    case 2:
-                        carregarJogo(sc);
-                        break;
-                    case 3:
-                        System.out.println("\n=== HISTÓRICO DE PARTIDAS ===");
-                        System.out.print(CampoMinadoHistorico.lerHistorico());
-                        break;
-                    case 4:
-                        configurarJogo(sc);
-                        break;
-                    case 5:
-                        mostrarRegras();
-                        break;
-                    case 6:
-                        mostrarCreditos();
-                        break;
-                    default:
-                        System.out.println("Opção inválida!");
+                    case 1: iniciarJogo(); break;
+                    case 2: carregarJogo(); break;
+                    case 3: Console.println("\n=== HISTÓRICO DE PARTIDAS ==="); Console.print(CampoMinadoHistorico.lerHistorico()); break;
+                    case 4: configurarJogo(); break;
+                    case 5: mostrarRegras(); break;
+                    case 6: mostrarCreditos(); break;
+                    case 7: personalizarConsole(); break;
+                    default: Console.println("Opção inválida!");
                 }
             }
+        } catch (NoSuchElementException e) {
+            Console.println("\nSaindo do jogo (Ctrl+C detectado)...");
         } catch (Exception e) {
-            System.out.println("Saindo do jogo...");
+            Console.println("Saindo do jogo...");
+            e.printStackTrace();
         } finally {
             sc.close();
         }
     }
 
-    // Inicia um novo jogo
-    private static void iniciarJogo(Scanner sc) {
-        CampoMinadoTabuleiro tabuleiro = new CampoMinadoTabuleiro(linhasPadrao, colunasPadrao, bombasPadrao);
+    private static void jogarTabuleiro(CampoMinadoTabuleiro tabuleiro, String nomeSaveAuto) {
         boolean fim = false;
-        boolean venceu = false;
         while (!fim) {
             mostrarTabuleiro(tabuleiro);
-            System.out.println("Digite: 1 para abrir, 2 para marcar/desmarcar bandeira, 3 para salvar, 9 para pause, 0 para sair para o menu principal");
+            Console.println("Digite: 1 para abrir, 2 para marcar/desmarcar bandeira, 3 para salvar, 9 para pause, 0 para sair para o menu principal");
             int op;
-            try {
-                op = Integer.parseInt(sc.nextLine());
-            } catch (Exception e) {
-                System.out.println("Opção inválida!");
-                continue;
-            }
+            try { op = Integer.parseInt(Console.input()); } catch (Exception e) { Console.println("Opção inválida!"); continue; }
             if (op == 0) break;
-            if (op == 9) {
-                if (menuPause(sc)) break;
-                else continue;
-            }
+            if (op == 9) { if (menuPause()) break; else continue; }
             if (op == 3) {
-                System.out.print("Digite o nome do arquivo para salvar: ");
-                String nome = sc.nextLine();
-                try {
-                    CampoMinadoPersistencia.salvarJogo(tabuleiro, nome);
-                    System.out.println("Jogo salvo com sucesso!");
-                } catch (IOException e) {
-                    System.out.println("Erro ao salvar: " + e.getMessage());
+                listarSaves();
+                String nomeSave = Console.input("Digite o nome do arquivo para salvar (sem extensão): ").trim();
+                if (nomeSave.isEmpty()) { Console.println("Nome inválido!"); continue; }
+                String[] saves = backend.CampoMinadoPersistencia.listarSaves();
+                boolean existe = false;
+                for (String s : saves) if (s.equals(nomeSave + ".save")) existe = true;
+                if (existe) {
+                    String resp = Console.input("Arquivo já existe. Deseja sobrescrever? (s/n): ").trim().toLowerCase();
+                    if (!resp.equals("s")) { Console.println("Operação cancelada."); continue; }
                 }
+                try {
+                    backend.CampoMinadoPersistencia.salvarJogo(tabuleiro, nomeSave);
+                    Console.println("Jogo salvo com sucesso!");
+                    nomeSaveAuto = nomeSave;
+                } catch (IOException e) { Console.println("Erro ao salvar: " + e.getMessage()); }
                 continue;
             }
-            if (op != 1 && op != 2) {
-                System.out.println("Opção inválida! Digite 1, 2, 3, 9 ou 0.");
-                continue;
-            }
+            if (op != 1 && op != 2) { Console.println("Opção inválida! Digite 1, 2, 3, 9 ou 0."); continue; }
             int l = -1, c = -1;
             while (true) {
-                System.out.print("Linha: ");
-                String linhaStr = sc.nextLine();
-                try {
-                    l = Integer.parseInt(linhaStr);
-                    if (l < 0 || l >= tabuleiro.getTotalLinhas()) {
-                        System.out.println("Linha fora do intervalo!");
-                        continue;
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println("Digite um número válido para a linha!");
-                }
+                String linhaStr = Console.input("Linha: ");
+                try { l = Integer.parseInt(linhaStr); if (l < 0 || l >= tabuleiro.getTotalLinhas()) { Console.println("Linha fora do intervalo!"); continue; } break; }
+                catch (Exception e) { Console.println("Digite um número válido para a linha!"); }
             }
             while (true) {
-                System.out.print("Coluna: ");
-                String colunaStr = sc.nextLine();
-                try {
-                    c = Integer.parseInt(colunaStr);
-                    if (c < 0 || c >= tabuleiro.getTotalColunas()) {
-                        System.out.println("Coluna fora do intervalo!");
-                        continue;
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println("Digite um número válido para a coluna!");
-                }
+                String colunaStr = Console.input("Coluna: ");
+                try { c = Integer.parseInt(colunaStr); if (c < 0 || c >= tabuleiro.getTotalColunas()) { Console.println("Coluna fora do intervalo!"); continue; } break; }
+                catch (Exception e) { Console.println("Digite um número válido para a coluna!"); }
             }
             try {
                 if (op == 1) {
                     tabuleiro.abrirCasa(l, c);
+                    if (nomeSaveAuto != null) { try { backend.CampoMinadoPersistencia.salvarJogo(tabuleiro, nomeSaveAuto); } catch (Exception ex) {} }
                     if (perdeu(tabuleiro)) {
                         revelarTodasBombas(tabuleiro);
                         mostrarTabuleiro(tabuleiro);
-                        System.out.println("Você perdeu!");
+                        Console.println("Você perdeu!");
                         fim = true;
-                        venceu = false;
                     } else if (venceu(tabuleiro)) {
                         mostrarTabuleiro(tabuleiro);
-                        System.out.println("Você venceu!");
+                        Console.println("Você venceu!");
                         fim = true;
-                        venceu = true;
                     }
                 } else if (op == 2) {
                     tabuleiro.alternarBandeira(l, c);
+                    if (nomeSaveAuto != null) { try { backend.CampoMinadoPersistencia.salvarJogo(tabuleiro, nomeSaveAuto); } catch (Exception ex) {} }
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                Console.println(e.getMessage());
                 if (e.getMessage() != null && e.getMessage().contains("Bomba encontrada!")) {
                     revelarTodasBombas(tabuleiro);
                     mostrarTabuleiro(tabuleiro);
                     fim = true;
-                    venceu = false;
                 }
             }
         }
-        // Registra no histórico ao final da partida
-        if (fim) {
-            CampoMinadoHistorico.registrar(venceu ? "Venceu" : "Perdeu", tabuleiro.getTotalLinhas(), tabuleiro.getTotalColunas(), tabuleiro.getBombas());
+    }
+
+    private static void listarSaves() {
+        String[] saves = backend.CampoMinadoPersistencia.listarSaves();
+        if (saves.length == 0) Console.println("Nenhum save encontrado.");
+        else {
+            Console.println("Saves disponíveis:");
+            for (String s : saves) {
+                String nome = s.endsWith(".save") ? s.substring(0, s.length() - 5) : s;
+                Console.println("- " + nome);
+            }
         }
     }
 
-    // Carrega um jogo salvo
-    private static void carregarJogo(Scanner sc) {
-        System.out.print("Digite o nome do arquivo para carregar: ");
-        String nome = sc.nextLine();
+    private static void iniciarJogo() {
+        CampoMinadoTabuleiro tabuleiro = new CampoMinadoTabuleiro(linhasPadrao, colunasPadrao, bombasPadrao);
+        jogarTabuleiro(tabuleiro, null);
+        if (tabuleiro.venceu() || tabuleiro.perdeu())
+            backend.CampoMinadoHistorico.registrar(tabuleiro.venceu() ? "Venceu" : "Perdeu", tabuleiro.getTotalLinhas(), tabuleiro.getTotalColunas(), tabuleiro.getBombas());
+    }
+
+    private static void carregarJogo() {
+        listarSaves();
+        Console.print("Digite o nome do arquivo para carregar (sem extensão): ");
+        String nome = Console.input().trim();
+        if (nome.isEmpty()) { Console.println("Nome inválido!"); return; }
         try {
-            CampoMinadoTabuleiro tabuleiro = CampoMinadoPersistencia.carregarJogo(nome);
-            System.out.println("Jogo carregado!");
-            boolean fim = false;
-            while (!fim) {
-                mostrarTabuleiro(tabuleiro);
-                System.out.println("Digite: 1 para abrir, 2 para marcar/desmarcar bandeira, 3 para salvar, 9 para pause, 0 para sair para o menu principal");
-                int op;
-                try {
-                    op = Integer.parseInt(sc.nextLine());
-                } catch (Exception e) {
-                    System.out.println("Opção inválida!");
-                    continue;
-                }
-                if (op == 0) break;
-                if (op == 9) {
-                    if (menuPause(sc)) break;
-                    else continue;
-                }
-                if (op == 3) {
-                    System.out.print("Digite o nome do arquivo para salvar: ");
-                    String nomeSave = sc.nextLine();
-                    try {
-                        CampoMinadoPersistencia.salvarJogo(tabuleiro, nomeSave);
-                        System.out.println("Jogo salvo com sucesso!");
-                    } catch (IOException e) {
-                        System.out.println("Erro ao salvar: " + e.getMessage());
-                    }
-                    continue;
-                }
-                if (op != 1 && op != 2) {
-                    System.out.println("Opção inválida! Digite 1, 2, 3, 9 ou 0.");
-                    continue;
-                }
-                int l = -1, c = -1;
-                while (true) {
-                    System.out.print("Linha: ");
-                    String linhaStr = sc.nextLine();
-                    try {
-                        l = Integer.parseInt(linhaStr);
-                        if (l < 0 || l >= tabuleiro.getTotalLinhas()) {
-                            System.out.println("Linha fora do intervalo!");
-                            continue;
-                        }
-                        break;
-                    } catch (Exception e) {
-                        System.out.println("Digite um número válido para a linha!");
-                    }
-                }
-                while (true) {
-                    System.out.print("Coluna: ");
-                    String colunaStr = sc.nextLine();
-                    try {
-                        c = Integer.parseInt(colunaStr);
-                        if (c < 0 || c >= tabuleiro.getTotalColunas()) {
-                            System.out.println("Coluna fora do intervalo!");
-                            continue;
-                        }
-                        break;
-                    } catch (Exception e) {
-                        System.out.println("Digite um número válido para a coluna!");
-                    }
-                }
-                try {
-                    if (op == 1) {
-                        tabuleiro.abrirCasa(l, c);
-                        if (perdeu(tabuleiro)) {
-                            revelarTodasBombas(tabuleiro);
-                            mostrarTabuleiro(tabuleiro);
-                            System.out.println("Você perdeu!");
-                            fim = true;
-                        } else if (venceu(tabuleiro)) {
-                            mostrarTabuleiro(tabuleiro);
-                            System.out.println("Você venceu!");
-                            fim = true;
-                        }
-                    } else if (op == 2) {
-                        tabuleiro.alternarBandeira(l, c);
-                    }
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    if (e.getMessage() != null && e.getMessage().contains("Bomba encontrada!")) {
-                        revelarTodasBombas(tabuleiro);
-                        mostrarTabuleiro(tabuleiro);
-                        fim = true;
-                    }
-                }
-            }
+            CampoMinadoTabuleiro tabuleiro = backend.CampoMinadoPersistencia.carregarJogo(nome);
+            Console.println("Jogo carregado!");
+            jogarTabuleiro(tabuleiro, nome);
         } catch (IOException e) {
-            System.out.println("Erro ao carregar: " + e.getMessage());
+            Console.println("Erro ao carregar: " + e.getMessage());
         }
     }
 
-    // Menu de pause
-    private static boolean menuPause(Scanner sc) {
+    private static boolean menuPause() {
         while (true) {
-            System.out.println("\n=== MENU DE PAUSE ===");
-            System.out.println("1. Voltar para o jogo");
-            System.out.println("2. Iniciar novo jogo");
-            System.out.println("3. Voltar ao Menu Principal");
-            System.out.println("0. Sair do jogo");
-            System.out.print("Escolha uma opção: ");
+            Console.println("\n=== MENU DE PAUSE ===");
+            Console.println("1. Voltar para o jogo");
+            Console.println("2. Iniciar novo jogo");
+            Console.println("3. Voltar ao Menu Principal");
+            Console.println("0. Sair do jogo");
+            Console.print("Escolha uma opção: ");
             int op;
-            try {
-                op = Integer.parseInt(sc.nextLine());
-            } catch (Exception e) {
-                System.out.println("Opção inválida!");
-                continue;
-            }
+            try { op = Integer.parseInt(Console.input()); } catch (Exception e) { Console.println("Opção inválida!"); continue; }
             switch (op) {
-                case 1:
-                    return false;
-                case 2:
-                    iniciarJogo(sc);
-                    return true;
-                case 3:
-                    return true;
-                case 0:
-                    System.out.println("Saindo do jogo...");
-                    System.exit(0);
-                default:
-                    System.out.println("Opção inválida!");
+                case 1: return false;
+                case 2: iniciarJogo(); return true;
+                case 3: return true;
+                case 0: Console.println("Saindo do jogo..."); System.exit(0);
+                default: Console.println("Opção inválida!");
             }
         }
     }
 
-    // Exibe as regras do jogo
     private static void mostrarRegras() {
-        System.out.println("\n=== REGRAS DO CAMPO MINADO ===");
-        System.out.println("- Abra casas sem bombas para vencer.");
-        System.out.println("- Números indicam quantas bombas há nas casas vizinhas.");
-        System.out.println("- Marque bandeiras onde suspeitar de bombas.");
-        System.out.println("- Se abrir uma bomba, você perde.");
+        Console.println("\n=== REGRAS DO CAMPO MINADO ===");
+        Console.println("- Abra casas sem bombas para vencer.");
+        Console.println("- Números indicam quantas bombas há nas casas vizinhas.");
+        Console.println("- Marque bandeiras onde suspeitar de bombas.");
+        Console.println("- Se abrir uma bomba, você perde.");
     }
 
-    // Exibe os créditos
     private static void mostrarCreditos() {
-        System.out.println("\n=== CRÉDITOS ===");
-        System.out.println("Desenvolvido por: Eduardo Marques");
-        System.out.println("Disciplina: Características das Linguagens de Programação - UERJ");
-        System.out.println("2025");
+        Console.println("\n=== CRÉDITOS ===");
+        Console.println("Desenvolvido por: Eduardo Marques");
+        Console.println("Disciplina: Características das Linguagens de Programação - UERJ");
+        Console.println("2025");
     }
 
-    // Exibe o tabuleiro no console
-    private static void mostrarTabuleiro(CampoMinadoTabuleiro tab) {
-        for (int i = 0; i < tab.getTotalLinhas(); i++) {
-            for (int j = 0; j < tab.getTotalColunas(); j++) {
-                Carta carta = tab.pegaCarta(i, j);
-                if (carta.estaViradaParaCima()) {
-                    if (carta instanceof CampoMinadoCarta) {
-                        CampoMinadoCarta cmc = (CampoMinadoCarta) carta;
-                        if (cmc.temBomba()) {
-                            System.out.print(" * ");
-                        } else if (cmc.getNumero() > 0) {
-                            System.out.print(" " + cmc.getNumero() + " ");
-                        } else {
-                            System.out.print("   ");
-                        }
-                    } else {
-                        System.out.print(" ? ");
-                    }
-                } else if (carta.getFrente().toString().equals("F")) {
-                    System.out.print(" F ");
-                } else {
-                    System.out.print(" # ");
-                }
-                tab.colocaCarta(i, j, carta); // devolve carta ao topo
-            }
-            System.out.println();
-        }
+    private static void personalizarConsole() {
+        Console.println("\n=== PERSONALIZAÇÃO ===");
+        Console.println("Escolha o símbolo da bomba:");
+        for (int i = 0; i < OPCOES_BOMBA.length; i++) Console.println((i+1) + ". " + OPCOES_BOMBA[i]);
+        Console.print("Opção (1-" + OPCOES_BOMBA.length + ") [atual: " + simboloBomba + "]: ");
+        try { int op = Integer.parseInt(Console.input()); if (op >= 1 && op <= OPCOES_BOMBA.length) simboloBomba = OPCOES_BOMBA[op-1]; } catch (Exception e) {}
+        Console.println("Escolha o símbolo da bandeira:");
+        for (int i = 0; i < OPCOES_BANDEIRA.length; i++) Console.println((i+1) + ". " + OPCOES_BANDEIRA[i]);
+        Console.print("Opção (1-" + OPCOES_BANDEIRA.length + ") [atual: " + simboloBandeira + "]: ");
+        try { int op = Integer.parseInt(Console.input()); if (op >= 1 && op <= OPCOES_BANDEIRA.length) simboloBandeira = OPCOES_BANDEIRA[op-1]; } catch (Exception e) {}
+        Console.println("Escolha a cor de fundo do tabuleiro:");
+        for (int i = 0; i < OPCOES_COR_FUNDO.length; i++) Console.println((i+1) + ". " + nomeCor(OPCOES_COR_FUNDO[i]));
+        Console.print("Opção (1-" + OPCOES_COR_FUNDO.length + ") [atual: " + nomeCor(corFundo) + "]: ");
+        try { int op = Integer.parseInt(Console.input()); if (op >= 1 && op <= OPCOES_COR_FUNDO.length) corFundo = OPCOES_COR_FUNDO[op-1]; } catch (Exception e) {}
+        Console.println("Escolha a cor dos números:");
+        for (int i = 0; i < OPCOES_COR_NUMERO.length; i++) Console.println((i+1) + ". " + nomeCor(OPCOES_COR_NUMERO[i]));
+        Console.print("Opção (1-" + OPCOES_COR_NUMERO.length + ") [atual: " + nomeCor(corNumero) + "]: ");
+        try { int op = Integer.parseInt(Console.input()); if (op >= 1 && op <= OPCOES_COR_NUMERO.length) corNumero = OPCOES_COR_NUMERO[op-1]; } catch (Exception e) {}
+        Console.println("Personalização salva!");
+        salvarPreferencias();
     }
-
-    // Verifica se o jogador venceu
-    private static boolean venceu(CampoMinadoTabuleiro tab) {
-        for (int i = 0; i < tab.getTotalLinhas(); i++) {
-            for (int j = 0; j < tab.getTotalColunas(); j++) {
-                Carta carta = tab.pegaCarta(i, j);
-                boolean ok = true;
-                if (carta instanceof CampoMinadoCarta) {
-                    CampoMinadoCarta c = (CampoMinadoCarta) carta;
-                    if (!c.temBomba() && !c.estaViradaParaCima()) {
-                        ok = false;
-                    }
-                }
-                tab.colocaCarta(i, j, carta);
-                if (!ok) return false;
-            }
-        }
-        return true;
+    private static String nomeCor(Cor cor) {
+        if (cor == null) return "Padrão";
+        String nome = cor.name().replace("FUNDO_", "Fundo ").replace("_CLARO", " Claro").replace("_CHOQUE", " Choque").replace("_BRANCO", " Branco");
+        nome = nome.substring(0,1).toUpperCase() + nome.substring(1).toLowerCase().replace('_', ' ');
+        if (cor == Cor.RESET) return "Padrão";
+        return nome;
     }
-
-    // Verifica se o jogador perdeu
-    private static boolean perdeu(CampoMinadoTabuleiro tab) {
-        for (int i = 0; i < tab.getTotalLinhas(); i++) {
-            for (int j = 0; j < tab.getTotalColunas(); j++) {
-                Carta carta = tab.pegaCarta(i, j);
-                boolean lost = false;
-                if (carta instanceof CampoMinadoCarta) {
-                    CampoMinadoCarta c = (CampoMinadoCarta) carta;
-                    if (c.temBomba() && c.estaViradaParaCima()) {
-                        lost = true;
-                    }
-                }
-                tab.colocaCarta(i, j, carta);
-                if (lost) return true;
-            }
-        }
-        return false;
+    private static Cor converteCorParaEnum(String cor) {
+        if (cor == null || cor.isEmpty()) return Cor.RESET;
+        try { return Cor.valueOf(cor); } catch (Exception e) { return Cor.RESET; }
     }
-
-    // Revela todas as bombas ao perder
-    private static void revelarTodasBombas(CampoMinadoTabuleiro tab) {
-        for (int i = 0; i < tab.getTotalLinhas(); i++) {
-            for (int j = 0; j < tab.getTotalColunas(); j++) {
-                Carta carta = tab.pegaCarta(i, j);
-                if (carta instanceof CampoMinadoCarta) {
-                    CampoMinadoCarta c = (CampoMinadoCarta) carta;
-                    if (c.temBomba() && !c.estaViradaParaCima()) {
-                        c.vira();
-                    }
-                }
-                tab.colocaCarta(i, j, carta);
-            }
-        }
+    private static void mostrarTabuleiro(CampoMinadoTabuleiro tab) { Console.println(tab); }
+    private static boolean venceu(CampoMinadoTabuleiro tab) { return tab.venceu(); }
+    private static boolean perdeu(CampoMinadoTabuleiro tab) { return tab.perdeu(); }
+    private static void revelarTodasBombas(CampoMinadoTabuleiro tab) { tab.revelarBombas(); }
+    private static void salvarPreferencias() {
+        CampoMinadoConfig.salvarPreferencias(simboloBomba, simboloBandeira, corFundo.name(), corNumero.name());
     }
-
-    // Configura o jogo (linhas, colunas, bombas)
-    private static void configurarJogo(Scanner sc) {
-        System.out.println("\n=== CONFIGURAÇÕES ===");
+    private static void configurarJogo() {
+        Console.println("\n=== CONFIGURAÇÕES ===");
         int l = -1, c = -1, b = -1;
         try {
-            System.out.print("Digite o número de linhas (mínimo 2): ");
-            while (!sc.hasNextInt()) {
-                System.out.println("Digite um número válido para linhas!");
-                sc.nextLine();
-                System.out.print("Digite o número de linhas (mínimo 2): ");
+            String entrada;
+            Console.print("Digite o número de linhas (mínimo 2): ");
+            while (true) {
+                entrada = Console.input();
+                if (entrada.matches("\\d+")) { l = Integer.parseInt(entrada); if (l >= 2) break; }
+                Console.println("Digite um número válido para linhas!");
+                Console.print("Digite o número de linhas (mínimo 2): ");
             }
-            l = sc.nextInt();
-            sc.nextLine(); // consumir quebra de linha
-            if (l < 2) throw new Exception();
-
-            System.out.print("Digite o número de colunas (mínimo 2): ");
-            while (!sc.hasNextInt()) {
-                System.out.println("Digite um número válido para colunas!");
-                sc.nextLine();
-                System.out.print("Digite o número de colunas (mínimo 2): ");
+            Console.print("Digite o número de colunas (mínimo 2): ");
+            while (true) {
+                entrada = Console.input();
+                if (entrada.matches("\\d+")) { c = Integer.parseInt(entrada); if (c >= 2) break; }
+                Console.println("Digite um número válido para colunas!");
+                Console.print("Digite o número de colunas (mínimo 2): ");
             }
-            c = sc.nextInt();
-            sc.nextLine();
-            if (c < 2) throw new Exception();
-
-            System.out.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "):");
-            while (!sc.hasNextInt()) {
-                System.out.println("Digite um número válido para bombas!");
-                sc.nextLine();
-                System.out.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "):");
+            Console.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "): ");
+            while (true) {
+                entrada = Console.input();
+                if (entrada.matches("\\d+")) { b = Integer.parseInt(entrada); if (b >= 1 && b < l * c) break; }
+                Console.println("Digite um número válido para bombas!");
+                Console.print("Digite o número de bombas (mínimo 1, máximo " + (l * c - 1) + "): ");
             }
-            b = sc.nextInt();
-            sc.nextLine();
-            if (b < 1 || b >= l * c) throw new Exception();
-
             linhasPadrao = l;
             colunasPadrao = c;
             bombasPadrao = b;
-            System.out.println("Configuração salva! Próximo jogo usará esses valores.");
+            JogoConfig.setPadrao(l, c, b);
+            Console.println("Configuração salva! Próximo jogo usará esses valores.");
         } catch (Exception e) {
-            System.out.println("Valores inválidos. Configuração não alterada.");
+            Console.println("Valores inválidos. Configuração não alterada.");
         }
     }
 }

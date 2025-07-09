@@ -15,7 +15,6 @@ public class CampoMinadoHistorico {
             String data = new Date().toString();
             out.printf("%s | %s | %dx%d | %d bombas\n", data, resultado, linhas, colunas, bombas);
         } catch (IOException e) {
-            // Silencia erro para não atrapalhar o jogo
         }
     }
     

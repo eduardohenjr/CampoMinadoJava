@@ -38,3 +38,41 @@ Inclua o arquivo JAR da engine em `lib/` para compilar e rodar o projeto.
 - Não é necessário interface gráfica.
 - O código foi mantido simples, usando apenas recursos básicos de Java (Scanner, PrintWriter, Date, etc).
 
+## Argumentos de Console
+
+O programa aceita argumentos de linha de comando para facilitar a execução direta de ações, sem passar pelo menu interativo. Veja as opções:
+
+- `novo`  
+  Inicia um novo jogo com a configuração padrão (5x5, 5 bombas ou a última configuração definida).
+  
+  Exemplo:
+  ```
+  java -cp bin;lib/cardgamemaker-0.3.jar frontend.Main novo
+  ```
+
+- `novo <linhas> <colunas> <bombas>`  
+  Inicia um novo jogo com a configuração informada.
+  
+  Exemplo:
+  ```
+  java -cp bin;lib/cardgamemaker-0.3.jar frontend.Main novo 6 6 8
+  ```
+
+- `carregar <nome_do_save>`  
+  Carrega diretamente um jogo salvo (sem extensão, ex: `partida1`).
+  
+  Exemplo:
+  ```
+  java -cp bin;lib/cardgamemaker-0.3.jar frontend.Main carregar partida1
+  ```
+
+- `config <linhas> <colunas> <bombas>`  
+  Define a configuração padrão para os próximos jogos.
+  
+  Exemplo:
+  ```
+  java -cp bin;lib/cardgamemaker-0.3.jar frontend.Main config 8 8 10
+  ```
+
+Se nenhum argumento for passado, o menu interativo será exibido normalmente.
+
