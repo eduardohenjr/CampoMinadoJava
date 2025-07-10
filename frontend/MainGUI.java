@@ -123,10 +123,6 @@ public class MainGUI {
         new JogoGUI(tabuleiro).setVisible(true);
     }
 
-    /**
-     * Exibe o menu principal em GUI e retorna a opção escolhida pelo usuário.
-     * 1: Iniciar Jogo, 2: Carregar Jogo, 3: Histórico, 4: Config, 5: Regras, 6: Créditos, 7: Personalizar, 0: Sair
-     */
     public static int menuPrincipalDialog() {
         String[] opcoes = {"Iniciar Jogo", "Carregar Jogo", "Histórico de Partidas", "Configurações", "Ver Regras", "Créditos", "Personalizar", "Sair"};
         int escolha = javax.swing.JOptionPane.showOptionDialog(
@@ -152,11 +148,6 @@ public class MainGUI {
             default: return 0; // Fechou a janela
         }
     }
-
-    /**
-     * Exibe o menu principal como janela Swing completa e retorna a opção escolhida.
-     * 1: Iniciar Jogo, 2: Carregar Jogo, 3: Histórico, 4: Config, 5: Regras, 6: Créditos, 7: Personalizar, 0: Sair
-     */
     public static int mostrarMenuPrincipalDialogSwing() {
         final int[] escolha = {-1};
         final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);

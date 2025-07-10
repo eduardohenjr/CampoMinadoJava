@@ -181,10 +181,9 @@ public class JogoGUI extends JFrame {
                 }
             }
             mostrarMenuPause();
-        } else if (escolha == 4) { // Sair do jogo
+        } else if (escolha == 4) {
             System.exit(0);
         }
-        // escolha == 0: Voltar para o jogo (não faz nada)
     }
 
     private void mostrarMenuPersonalizacao() {
