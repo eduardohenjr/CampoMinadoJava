@@ -122,4 +122,82 @@ public class MainGUI {
     public static void abrirNovoJogo(backend.CampoMinadoTabuleiro tabuleiro) {
         new JogoGUI(tabuleiro).setVisible(true);
     }
+
+    /**
+     * Exibe o menu principal em GUI e retorna a opção escolhida pelo usuário.
+     * 1: Iniciar Jogo, 2: Carregar Jogo, 3: Histórico, 4: Config, 5: Regras, 6: Créditos, 7: Personalizar, 0: Sair
+     */
+    public static int menuPrincipalDialog() {
+        String[] opcoes = {"Iniciar Jogo", "Carregar Jogo", "Histórico de Partidas", "Configurações", "Ver Regras", "Créditos", "Personalizar", "Sair"};
+        int escolha = javax.swing.JOptionPane.showOptionDialog(
+            null,
+            "Escolha uma opção:",
+            "Menu Principal",
+            javax.swing.JOptionPane.DEFAULT_OPTION,
+            javax.swing.JOptionPane.PLAIN_MESSAGE,
+            null,
+            opcoes,
+            opcoes[0]
+        );
+        // Mapeia para os mesmos valores do menu de texto
+        switch (escolha) {
+            case 0: return 1; // Iniciar Jogo
+            case 1: return 2; // Carregar Jogo
+            case 2: return 3; // Histórico
+            case 3: return 4; // Config
+            case 4: return 5; // Regras
+            case 5: return 6; // Créditos
+            case 6: return 7; // Personalizar
+            case 7: return 0; // Sair
+            default: return 0; // Fechou a janela
+        }
+    }
+
+    /**
+     * Exibe o menu principal como janela Swing completa e retorna a opção escolhida.
+     * 1: Iniciar Jogo, 2: Carregar Jogo, 3: Histórico, 4: Config, 5: Regras, 6: Créditos, 7: Personalizar, 0: Sair
+     */
+    public static int mostrarMenuPrincipalDialogSwing() {
+        final int[] escolha = {-1};
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Campo Minado - Menu Principal");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setSize(400, 400);
+            frame.setLocationRelativeTo(null);
+            JPanel panel = new JPanel(new GridLayout(0, 1, 10, 10));
+            JButton btnNovo = new JButton("Iniciar Jogo");
+            JButton btnCarregar = new JButton("Carregar Jogo");
+            JButton btnHistorico = new JButton("Histórico de Partidas");
+            JButton btnConfig = new JButton("Configurações");
+            JButton btnRegras = new JButton("Ver Regras");
+            JButton btnCreditos = new JButton("Créditos");
+            JButton btnSair = new JButton("Sair");
+            JButton btnPersonalizar = new JButton("Personalizar");
+            panel.add(btnNovo);
+            panel.add(btnCarregar);
+            panel.add(btnHistorico);
+            panel.add(btnConfig);
+            panel.add(btnRegras);
+            panel.add(btnCreditos);
+            panel.add(btnSair);
+            panel.add(btnPersonalizar);
+            btnNovo.addActionListener(e -> { escolha[0] = 1; frame.dispose(); latch.countDown(); });
+            btnCarregar.addActionListener(e -> { escolha[0] = 2; frame.dispose(); latch.countDown(); });
+            btnHistorico.addActionListener(e -> { escolha[0] = 3; frame.dispose(); latch.countDown(); });
+            btnConfig.addActionListener(e -> { escolha[0] = 4; frame.dispose(); latch.countDown(); });
+            btnRegras.addActionListener(e -> { escolha[0] = 5; frame.dispose(); latch.countDown(); });
+            btnCreditos.addActionListener(e -> { escolha[0] = 6; frame.dispose(); latch.countDown(); });
+            btnPersonalizar.addActionListener(e -> { escolha[0] = 7; frame.dispose(); latch.countDown(); });
+            btnSair.addActionListener(e -> { escolha[0] = 0; frame.dispose(); latch.countDown(); });
+            frame.setContentPane(panel);
+            frame.setVisible(true);
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return escolha[0];
+    }
 }
