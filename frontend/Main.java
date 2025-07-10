@@ -71,8 +71,6 @@ public class Main {
             return;
         }
         if (modoGuiJogo) {
-            // Não chama MainGUI.main(args)!
-            // Segue para o menu principal no console, mas ao iniciar/carregar jogo, abre o tabuleiro em GUI
             while (true) {
                 Console.println("\n=== MENU PRINCIPAL ===");
                 Console.println("1. Iniciar Jogo");
@@ -124,7 +122,7 @@ public class Main {
             }
             return;
         }
-        // Se modoGuiPrincipal, exibe menu principal em GUI e segue no console
+
         if (modoGuiPrincipal) {
             int escolha = frontend.MainGUI.mostrarMenuPrincipalDialogSwing(); 
             switch (escolha) {
@@ -138,7 +136,6 @@ public class Main {
                 case 7: personalizarConsole(); break;
                 default: Console.println("Opção inválida!"); return;
             }
-            // Após a ação, segue normalmente para o menu de texto se desejar
             while (true) {
                 Console.println("\n=== MENU PRINCIPAL ===");
                 Console.println("1. Iniciar Jogo");
@@ -286,8 +283,6 @@ public class Main {
         }
     }
 
-    // --- MÉTODOS PRINCIPAIS (apenas uma versão de cada) ---
-
     private static void jogarTabuleiro(CampoMinadoTabuleiro tabuleiro, String nomeSaveAuto, boolean modoPauseGUI) {
         boolean fim = false;
         while (!fim) {
@@ -382,8 +377,6 @@ public class Main {
             }
         }
     }
-
-    // Enum e método de pause corretos (apenas uma versão)
     private enum PauseAction { VOLTAR, NOVO_JOGO, MENU_PRINCIPAL, SALVAR, SAIR }
 
     private static PauseAction menuPauseAction(CampoMinadoTabuleiro tabuleiro, boolean modoPauseGUI) {
