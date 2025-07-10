@@ -43,6 +43,7 @@ public class JogoGUI extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(Math.max(400, 40 * colunas), Math.max(400, 40 * linhas + 120)));
         setLocationRelativeTo(null);
+        setAlwaysOnTop(true); 
         setLayout(new BorderLayout(10, 10));
         topPanel = new JPanel(new BorderLayout());
         JLabel titulo = new JLabel("\uD83D\uDCA3 Campo Minado", SwingConstants.CENTER);
@@ -51,7 +52,6 @@ public class JogoGUI extends JFrame {
         statusLabel = new JLabel("Bombas: " + bombas + " | Casas abertas: 0", SwingConstants.CENTER);
         statusLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         topPanel.add(statusLabel, BorderLayout.SOUTH);
-        // Botão de pause
         JButton pauseBtn = new JButton("\u23F8 Pause");
         pauseBtn.setFont(new Font("Arial", Font.PLAIN, 14));
         pauseBtn.addActionListener(e -> mostrarMenuPause());

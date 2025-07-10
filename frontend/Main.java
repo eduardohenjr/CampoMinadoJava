@@ -67,10 +67,8 @@ public class Main {
             }
         }
         if (modoGuiGeral) {
-            modoGuiPrincipal = true;
-            modoGuiPause = true;
-            modoGuiArquivos = true;
-            modoGuiJogo = true;
+            frontend.MainGUI.main(args);
+            return;
         }
         if (modoGuiJogo) {
             // Não chama MainGUI.main(args)!
